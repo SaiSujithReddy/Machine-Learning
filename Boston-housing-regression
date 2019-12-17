@@ -1,0 +1,23 @@
+# How to use Pipelines and power transformer 
+Source - https://machinelearningmastery.com/how-to-transform-target-variables-for-regression-with-scikit-learn/
+from numpy import mean
+from numpy import absolute
+from sklearn.preprocessing import PowerTransformer
+from sklearn.compose import TransformedTargetRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import HuberRegressor
+from sklearn.model_selection import KFold
+pipeline = Pipeline(steps=[('power', PowerTransformer()), ('model', HuberRegressor())])
+# prepare the model with target scaling
+model = TransformedTargetRegressor(regressor=pipeline, transformer=PowerTransformer())
+# evaluate model
+cv = KFold(n_splits=10, shuffle=True, random_state=1)
+scores = cross_val_score(model, X, y, scoring='neg_mean_absolute_error', cv=cv, n_jobs=-1)
+from sklearn.model_selection import cross_val_score
+cv = KFold(n_splits=10, shuffle=True, random_state=1)
+scores = cross_val_score(model, X, y, scoring='neg_mean_absolute_error', cv=cv, n_jobs=-1)
+# convert scores to positive
+scores = absolute(scores)
+# summarize the result
+s_mean = mean(scores)
+print('Mean MAE: %.3f' % (s_mean))
